@@ -1,6 +1,8 @@
-package com.example.avjindersinghsekhon.minimaltodo;
+package com.example.avjindersinghsekhon.minimaltodo.business;
 
 import android.content.Context;
+
+import com.example.avjindersinghsekhon.minimaltodo.model.ToDoItem;
 
 import org.json.JSONArray;
 import org.json.JSONException;
