@@ -26,7 +26,6 @@ import android.widget.TextView;
 
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.amulyakhare.textdrawable.util.ColorGenerator;
-import com.example.avjindersinghsekhon.minimaltodo.AnalyticsApplication;
 import com.example.avjindersinghsekhon.minimaltodo.CustomRecyclerScrollViewListener;
 import com.example.avjindersinghsekhon.minimaltodo.ItemTouchHelperClass;
 import com.example.avjindersinghsekhon.minimaltodo.R;
@@ -45,19 +44,19 @@ import java.util.Date;
 
 public class MainActivity extends BaseActivity {
 
+  public static final String DATE_TIME_FORMAT_12_HOUR = "MMM d, yyyy  h:mm a";
+  public static final String DATE_TIME_FORMAT_24_HOUR = "MMM d, yyyy  k:mm";
+  public static final String TODOITEM = "com.avjindersinghsekhon.com.avjindersinghsekhon.minimaltodo.MainActivity";
+  private static final int REQUEST_ID_TODO_ITEM = 100;
+
   private RecyclerViewEmptySupport mRecyclerView;
   private FloatingActionButton mAddToDoItemFAB;
   private ArrayList<ToDoItem> mToDoItemsArrayList;
   private CoordinatorLayout mCoordLayout;
-  public static final String TODOITEM = "com.avjindersinghsekhon.com.avjindersinghsekhon.minimaltodo.MainActivity";
   private BasicListAdapter adapter;
-  private static final int REQUEST_ID_TODO_ITEM = 100;
   private ToDoItem mJustDeletedToDoItem;
   private int mIndexOfDeletedToDoItem;
-  public static final String DATE_TIME_FORMAT_12_HOUR = "MMM d, yyyy  h:mm a";
-  public static final String DATE_TIME_FORMAT_24_HOUR = "MMM d, yyyy  k:mm";
-  public static final String FILENAME = "todoitems.json";
-  private StoreRetrieveData storeRetrieveData;
+  private StoreRetrieveData storeRetrieveData = StoreRetrieveData.INSTANCE;
   public ItemTouchHelper itemTouchHelper;
   private CustomRecyclerScrollViewListener customRecyclerScrollViewListener;
 
@@ -106,7 +105,6 @@ public class MainActivity extends BaseActivity {
 
   @Override
   protected void onStart() {
-    app = (AnalyticsApplication) getApplication();
     super.onStart();
     if (preferenceAccessor.getChangeOccured()) {
 
@@ -144,7 +142,6 @@ public class MainActivity extends BaseActivity {
 
     preferenceAccessor.setChangeOccured(false);
 
-    storeRetrieveData = new StoreRetrieveData(this, FILENAME);
     mToDoItemsArrayList = getLocallyStoredData(storeRetrieveData);
     adapter = new BasicListAdapter(mToDoItemsArrayList);
     setAlarms();
@@ -428,15 +425,6 @@ public class MainActivity extends BaseActivity {
     }
   }
 
-  private void saveDate() {
-    try {
-      storeRetrieveData.saveToFile(mToDoItemsArrayList);
-    } catch (JSONException | IOException e) {
-      e.printStackTrace();
-    }
-
-  }
-
   @Override
   protected void onPause() {
     super.onPause();
@@ -450,7 +438,6 @@ public class MainActivity extends BaseActivity {
 
   @Override
   protected void onDestroy() {
-
     super.onDestroy();
     mRecyclerView.removeOnScrollListener(customRecyclerScrollViewListener);
   }

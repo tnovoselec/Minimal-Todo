@@ -30,7 +30,6 @@ import fr.ganfra.materialspinner.MaterialSpinner;
 
 public class ReminderActivity extends BaseActivity {
 
-
   @Bind(R.id.toDoReminderTextViewBody)
   TextView mtoDoTextTextView;
 
@@ -40,7 +39,7 @@ public class ReminderActivity extends BaseActivity {
   @Bind(R.id.reminderViewSnoozeTextView)
   TextView mSnoozeTextView;
 
-  private StoreRetrieveData storeRetrieveData;
+  private StoreRetrieveData storeRetrieveData = StoreRetrieveData.INSTANCE;
   private ArrayList<ToDoItem> mToDoItems;
   private ToDoItem mItem;
 
@@ -51,7 +50,6 @@ public class ReminderActivity extends BaseActivity {
     setContentView(R.layout.reminder_layout);
     ButterKnife.bind(this);
 
-    storeRetrieveData = new StoreRetrieveData(this, MainActivity.FILENAME);
     mToDoItems = MainActivity.getLocallyStoredData(storeRetrieveData);
     String[] snoozeOptionsArray = getResources().getStringArray(R.array.snooze_options);
 

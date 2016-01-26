@@ -3,7 +3,6 @@ package com.example.avjindersinghsekhon.minimaltodo.service;
 import android.app.IntentService;
 import android.content.Intent;
 
-import com.example.avjindersinghsekhon.minimaltodo.activity.MainActivity;
 import com.example.avjindersinghsekhon.minimaltodo.business.PreferenceAccessor;
 import com.example.avjindersinghsekhon.minimaltodo.business.StoreRetrieveData;
 import com.example.avjindersinghsekhon.minimaltodo.model.ToDoItem;
@@ -13,7 +12,7 @@ import java.util.UUID;
 
 public class DeleteNotificationService extends IntentService {
 
-  private StoreRetrieveData storeRetrieveData;
+  private StoreRetrieveData storeRetrieveData = StoreRetrieveData.INSTANCE;
   private ArrayList<ToDoItem> mToDoItems;
   private ToDoItem mItem;
   private PreferenceAccessor preferenceAccessor = PreferenceAccessor.INSTANCE;
@@ -24,7 +23,6 @@ public class DeleteNotificationService extends IntentService {
 
   @Override
   protected void onHandleIntent(Intent intent) {
-    storeRetrieveData = new StoreRetrieveData(this, MainActivity.FILENAME);
     UUID todoID = (UUID) intent.getSerializableExtra(TodoNotificationService.TODOUUID);
 
     mToDoItems = loadData();
