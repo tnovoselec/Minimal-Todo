@@ -1,5 +1,7 @@
 package com.example.avjindersinghsekhon.minimaltodo.model;
 
+import com.amulyakhare.textdrawable.util.ColorGenerator;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -7,6 +9,9 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
 
+// TODO don't use UUID for id when long will do
+// TODO make class parcelable instead of serializable
+// TODO use Gson for converting
 public class ToDoItem implements Serializable {
 
   private static final String TODOTEXT = "todotext";
@@ -20,6 +25,13 @@ public class ToDoItem implements Serializable {
   private int mTodoColor;
   private Date mToDoDate;
   private UUID mTodoIdentifier;
+
+  public static ToDoItem createEmpty() {
+    ToDoItem item = new ToDoItem("", false, null);
+    int color = ColorGenerator.MATERIAL.getRandomColor();
+    item.setTodoColor(color);
+    return item;
+  }
 
   public ToDoItem(String todoBody, boolean hasReminder, Date toDoDate) {
     mToDoText = todoBody;

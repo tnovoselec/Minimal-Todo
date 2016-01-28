@@ -11,7 +11,7 @@ public enum PreferenceAccessor {
   private static final String THEME_PREFERENCES = "com.avjindersekhon.themepref";
 
   private static final String EXIT = "com.avjindersekhon.exit";
-  private static final String CHANGE_OCCURED = "com.avjinder.changeoccured";
+  private static final String CHANGE_OCCURRED = "com.avjinder.changeoccured";
   private static final String RECREATE_ACTIVITY = "com.avjindersekhon.recreateactivity";
   private static final String THEME_SAVED = "com.avjindersekhon.savedtheme";
   public static final String DARKTHEME = "com.avjindersekon.darktheme";
@@ -33,12 +33,12 @@ public enum PreferenceAccessor {
     return sharedPreferences.getBoolean(EXIT, false);
   }
 
-  public void setChangeOccured(boolean changeOccured){
-    sharedPreferences.edit().putBoolean(CHANGE_OCCURED, changeOccured).apply();
+  public void setChangeOccurred(boolean changeOccurred){
+    sharedPreferences.edit().putBoolean(CHANGE_OCCURRED, changeOccurred).apply();
   }
 
-  public boolean getChangeOccured(){
-    return sharedPreferences.getBoolean(CHANGE_OCCURED, false);
+  public boolean getChangeOccurred(){
+    return sharedPreferences.getBoolean(CHANGE_OCCURRED, false);
   }
 
   public void setRecreateActivity(boolean recreateActivity){
@@ -55,5 +55,10 @@ public enum PreferenceAccessor {
 
   public String getThemeSaved(){
     return themePreferences.getString(THEME_SAVED, LIGHTTHEME);
+  }
+
+  public void clearAll(){
+    sharedPreferences.edit().clear().apply();
+    themePreferences.edit().clear().apply();
   }
 }

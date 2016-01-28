@@ -51,6 +51,13 @@ public class TestTodoItem extends TestCase {
         assertEquals(CURRENT_DATE, toDoItem.getToDoDate());
     }
 
+    public void testCreateEmptyItem(){
+        ToDoItem emptyToDoItem = ToDoItem.createEmpty();
+        assertEquals("", emptyToDoItem.getToDoText());
+        assertEquals(false, emptyToDoItem.hasReminder());
+        assertEquals(null, emptyToDoItem.getToDoDate());
+    }
+
      /**
       * Ensure we can marshall ToDoItem objects to Json
       */

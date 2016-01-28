@@ -10,17 +10,14 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.example.avjindersinghsekhon.minimaltodo.R;
+import com.example.avjindersinghsekhon.minimaltodo.business.DataHandler;
 import com.example.avjindersinghsekhon.minimaltodo.business.PreferenceAccessor;
-import com.example.avjindersinghsekhon.minimaltodo.business.StoreRetrieveData;
 import com.example.avjindersinghsekhon.minimaltodo.model.ToDoItem;
 import com.example.avjindersinghsekhon.minimaltodo.service.TodoNotificationService;
 
-import org.json.JSONException;
-
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import butterknife.Bind;
@@ -39,8 +36,8 @@ public class ReminderActivity extends BaseActivity {
   @Bind(R.id.reminderViewSnoozeTextView)
   TextView mSnoozeTextView;
 
-  private StoreRetrieveData storeRetrieveData = StoreRetrieveData.INSTANCE;
-  private ArrayList<ToDoItem> mToDoItems;
+  private DataHandler dataHandler = DataHandler.INSTANCE;
+  private List<ToDoItem> mToDoItems;
   private ToDoItem mItem;
 
   @Override
@@ -50,7 +47,7 @@ public class ReminderActivity extends BaseActivity {
     setContentView(R.layout.reminder_layout);
     ButterKnife.bind(this);
 
-    mToDoItems = MainActivity.getLocallyStoredData(storeRetrieveData);
+    mToDoItems = dataHandler.getToDoItems();
     String[] snoozeOptionsArray = getResources().getStringArray(R.array.snooze_options);
 
     setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
@@ -109,7 +106,7 @@ public class ReminderActivity extends BaseActivity {
   }
 
   private void changeOccurred() {
-    preferenceAccessor.setChangeOccured(true);
+    preferenceAccessor.setChangeOccurred(true);
   }
 
   private Date addTimeToDate(int mins) {
@@ -151,10 +148,6 @@ public class ReminderActivity extends BaseActivity {
   }
 
   private void saveData() {
-    try {
-      storeRetrieveData.saveToFile(mToDoItems);
-    } catch (JSONException | IOException e) {
-      e.printStackTrace();
-    }
+    dataHandler.saveToDoItems(mToDoItems);
   }
 }

@@ -1,6 +1,7 @@
 package com.example.avjindersinghsekhon.minimaltodo.activity;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -13,7 +14,6 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -201,7 +201,6 @@ public class AddToDoActivity extends BaseActivity implements DatePickerDialog.On
         Date date;
         hideKeyboard(mToDoTextBodyEditText);
         if (mUserToDoItem.getToDoDate() != null) {
-//                    date = mUserToDoItem.getToDoDate();
           date = mUserReminderDate;
         } else {
           date = new Date();
@@ -275,8 +274,8 @@ public class AddToDoActivity extends BaseActivity implements DatePickerDialog.On
       }
       cal.set(Calendar.MINUTE, 0);
       mUserReminderDate = cal.getTime();
-      Log.d("OskarSchindler", "Imagined Date: " + mUserReminderDate);
       String timeString;
+
       if (time24) {
         timeString = formatDate("k:mm", mUserReminderDate);
       } else {
@@ -448,57 +447,26 @@ public class AddToDoActivity extends BaseActivity implements DatePickerDialog.On
   }
 
   public void setEnterDateLayoutVisible(boolean checked) {
-    if (checked) {
-      mUserDateSpinnerContainingLinearLayout.setVisibility(View.VISIBLE);
-    } else {
-      mUserDateSpinnerContainingLinearLayout.setVisibility(View.INVISIBLE);
-    }
+    mUserDateSpinnerContainingLinearLayout.setVisibility(checked ? View.VISIBLE : View.INVISIBLE);
   }
 
   public void setEnterDateLayoutVisibleWithAnimations(boolean checked) {
     if (checked) {
       setReminderTextView();
       mUserDateSpinnerContainingLinearLayout.animate().alpha(1.0f).setDuration(500).setListener(
-          new Animator.AnimatorListener() {
+          new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
               mUserDateSpinnerContainingLinearLayout.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
             }
           }
       );
     } else {
       mUserDateSpinnerContainingLinearLayout.animate().alpha(0.0f).setDuration(500).setListener(
-          new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-
-            }
-
+          new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
               mUserDateSpinnerContainingLinearLayout.setVisibility(View.INVISIBLE);
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
             }
           }
       );

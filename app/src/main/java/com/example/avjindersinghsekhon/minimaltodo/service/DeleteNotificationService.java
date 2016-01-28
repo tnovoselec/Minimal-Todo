@@ -3,19 +3,19 @@ package com.example.avjindersinghsekhon.minimaltodo.service;
 import android.app.IntentService;
 import android.content.Intent;
 
+import com.example.avjindersinghsekhon.minimaltodo.business.DataHandler;
 import com.example.avjindersinghsekhon.minimaltodo.business.PreferenceAccessor;
-import com.example.avjindersinghsekhon.minimaltodo.business.StoreRetrieveData;
 import com.example.avjindersinghsekhon.minimaltodo.model.ToDoItem;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class DeleteNotificationService extends IntentService {
 
-  private StoreRetrieveData storeRetrieveData = StoreRetrieveData.INSTANCE;
-  private ArrayList<ToDoItem> mToDoItems;
+  private List<ToDoItem> mToDoItems;
   private ToDoItem mItem;
   private PreferenceAccessor preferenceAccessor = PreferenceAccessor.INSTANCE;
+  private DataHandler dataHandler = DataHandler.INSTANCE;
 
   public DeleteNotificationService() {
     super("DeleteNotificationService");
@@ -39,21 +39,15 @@ public class DeleteNotificationService extends IntentService {
         dataChanged();
         saveData();
       }
-
     }
-
   }
 
   private void dataChanged() {
-    preferenceAccessor.setChangeOccured(true);
+    preferenceAccessor.setChangeOccurred(true);
   }
 
   private void saveData() {
-    try {
-      storeRetrieveData.saveToFile(mToDoItems);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    dataHandler.saveToDoItems(mToDoItems);
   }
 
   @Override
@@ -62,14 +56,7 @@ public class DeleteNotificationService extends IntentService {
     saveData();
   }
 
-  private ArrayList<ToDoItem> loadData() {
-    try {
-      return storeRetrieveData.loadFromFile();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-    return null;
-
+  private List<ToDoItem> loadData() {
+    return dataHandler.getToDoItems();
   }
 }

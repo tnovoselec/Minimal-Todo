@@ -1,46 +1,36 @@
 package com.example.avjindersinghsekhon.minimaltodo.activity;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
-import com.amulyakhare.textdrawable.TextDrawable;
-import com.amulyakhare.textdrawable.util.ColorGenerator;
 import com.example.avjindersinghsekhon.minimaltodo.CustomRecyclerScrollViewListener;
 import com.example.avjindersinghsekhon.minimaltodo.ItemTouchHelperClass;
 import com.example.avjindersinghsekhon.minimaltodo.R;
+import com.example.avjindersinghsekhon.minimaltodo.adapter.BasicListAdapter;
+import com.example.avjindersinghsekhon.minimaltodo.adapter.BasicListAdapter.OnItemRemovedListener;
+import com.example.avjindersinghsekhon.minimaltodo.business.AlarmHandler;
+import com.example.avjindersinghsekhon.minimaltodo.business.DataHandler;
 import com.example.avjindersinghsekhon.minimaltodo.business.PreferenceAccessor;
-import com.example.avjindersinghsekhon.minimaltodo.business.StoreRetrieveData;
 import com.example.avjindersinghsekhon.minimaltodo.model.ToDoItem;
-import com.example.avjindersinghsekhon.minimaltodo.service.TodoNotificationService;
 import com.example.avjindersinghsekhon.minimaltodo.view.RecyclerViewEmptySupport;
 
-import org.json.JSONException;
+import java.util.List;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class MainActivity extends BaseActivity {
 
@@ -49,32 +39,42 @@ public class MainActivity extends BaseActivity {
   public static final String TODOITEM = "com.avjindersinghsekhon.com.avjindersinghsekhon.minimaltodo.MainActivity";
   private static final int REQUEST_ID_TODO_ITEM = 100;
 
-  private RecyclerViewEmptySupport mRecyclerView;
-  private FloatingActionButton mAddToDoItemFAB;
-  private ArrayList<ToDoItem> mToDoItemsArrayList;
-  private CoordinatorLayout mCoordLayout;
+  @Bind(R.id.toDoRecyclerView)
+  RecyclerViewEmptySupport recyclerView;
+
+  @Bind(R.id.addToDoItemFAB)
+  FloatingActionButton addToDoItemFAB;
+
+  @Bind(R.id.myCoordinatorLayout)
+  CoordinatorLayout coordinatorLayout;
+
+  private List<ToDoItem> toDoItems;
   private BasicListAdapter adapter;
-  private ToDoItem mJustDeletedToDoItem;
-  private int mIndexOfDeletedToDoItem;
-  private StoreRetrieveData storeRetrieveData = StoreRetrieveData.INSTANCE;
-  public ItemTouchHelper itemTouchHelper;
+  private AlarmHandler alarmHandler = AlarmHandler.INSTANCE;
+  private DataHandler dataHandler = DataHandler.INSTANCE;
   private CustomRecyclerScrollViewListener customRecyclerScrollViewListener;
 
-  public static ArrayList<ToDoItem> getLocallyStoredData(StoreRetrieveData storeRetrieveData) {
-    ArrayList<ToDoItem> items = null;
 
-    try {
-      items = storeRetrieveData.loadFromFile();
+  protected void onCreate(Bundle savedInstanceState) {
+    //We recover the theme we've set and setTheme accordingly
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
 
-    } catch (IOException | JSONException e) {
-      e.printStackTrace();
-    }
+    ButterKnife.bind(this);
 
-    if (items == null) {
-      items = new ArrayList<>();
-    }
-    return items;
+    preferenceAccessor.setChangeOccurred(false);
 
+    toDoItems = dataHandler.getToDoItems();
+
+    setAlarms();
+
+    final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+    setSupportActionBar(toolbar);
+
+
+    adapter = new BasicListAdapter(toDoItems, onItemClickedListener(), onItemRemovedListener(), this);
+
+    setUpRecyclerView();
   }
 
   @Override
@@ -106,101 +106,58 @@ public class MainActivity extends BaseActivity {
   @Override
   protected void onStart() {
     super.onStart();
-    if (preferenceAccessor.getChangeOccured()) {
+    if (preferenceAccessor.getChangeOccurred()) {
 
-      mToDoItemsArrayList = getLocallyStoredData(storeRetrieveData);
-      adapter = new BasicListAdapter(mToDoItemsArrayList);
-      mRecyclerView.setAdapter(adapter);
+      toDoItems = dataHandler.getToDoItems();
+      adapter = new BasicListAdapter(toDoItems, onItemClickedListener(), onItemRemovedListener(), this);
+      recyclerView.setAdapter(adapter);
       setAlarms();
 
-      preferenceAccessor.setChangeOccured(false);
+      preferenceAccessor.setChangeOccurred(false);
     }
   }
 
   private void setAlarms() {
-    if (mToDoItemsArrayList != null) {
-      for (ToDoItem item : mToDoItemsArrayList) {
-        if (item.hasReminder() && item.getToDoDate() != null) {
-          if (item.getToDoDate().before(new Date())) {
-            item.setToDoDate(null);
-            continue;
-          }
-          Intent i = new Intent(this, TodoNotificationService.class);
-          i.putExtra(TodoNotificationService.TODOUUID, item.getIdentifier());
-          i.putExtra(TodoNotificationService.TODOTEXT, item.getToDoText());
-          createAlarm(i, item.getIdentifier().hashCode(), item.getToDoDate().getTime());
-        }
-      }
-    }
+    alarmHandler.setAlarms(toDoItems, this);
   }
 
-  protected void onCreate(Bundle savedInstanceState) {
-    //We recover the theme we've set and setTheme accordingly
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_main);
-
-
-    preferenceAccessor.setChangeOccured(false);
-
-    mToDoItemsArrayList = getLocallyStoredData(storeRetrieveData);
-    adapter = new BasicListAdapter(mToDoItemsArrayList);
-    setAlarms();
-    final android.support.v7.widget.Toolbar toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.toolbar);
-    setSupportActionBar(toolbar);
-
-
-    mCoordLayout = (CoordinatorLayout) findViewById(R.id.myCoordinatorLayout);
-    mAddToDoItemFAB = (FloatingActionButton) findViewById(R.id.addToDoItemFAB);
-
-    mAddToDoItemFAB.setOnClickListener(new View.OnClickListener() {
-
-      @SuppressWarnings("deprecation")
-      @Override
-      public void onClick(View v) {
-        tracker.send(this, "Action", "FAB pressed");
-        Intent newTodo = new Intent(MainActivity.this, AddToDoActivity.class);
-        ToDoItem item = new ToDoItem("", false, null);
-        int color = ColorGenerator.MATERIAL.getRandomColor();
-        item.setTodoColor(color);
-        newTodo.putExtra(TODOITEM, item);
-        startActivityForResult(newTodo, REQUEST_ID_TODO_ITEM);
-      }
-    });
-
-
-    mRecyclerView = (RecyclerViewEmptySupport) findViewById(R.id.toDoRecyclerView);
+  private void setUpRecyclerView() {
     if (theme.equals(PreferenceAccessor.LIGHTTHEME)) {
-      mRecyclerView.setBackgroundColor(getResources().getColor(R.color.primary_lightest));
+      recyclerView.setBackgroundColor(getResources().getColor(R.color.primary_lightest));
     }
-    mRecyclerView.setEmptyView(findViewById(R.id.toDoEmptyView));
-    mRecyclerView.setHasFixedSize(true);
-    mRecyclerView.setItemAnimator(new DefaultItemAnimator());
-    mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+    recyclerView.setEmptyView(findViewById(R.id.toDoEmptyView));
+    recyclerView.setHasFixedSize(true);
+    recyclerView.setItemAnimator(new DefaultItemAnimator());
+    recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
 
     customRecyclerScrollViewListener = new CustomRecyclerScrollViewListener() {
       @Override
       public void show() {
-
-        mAddToDoItemFAB.animate().translationY(0).setInterpolator(new DecelerateInterpolator(2)).start();
+        addToDoItemFAB.animate()
+            .translationY(0)
+            .setInterpolator(new DecelerateInterpolator(2.0f))
+            .start();
       }
 
       @Override
       public void hide() {
 
-        CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) mAddToDoItemFAB.getLayoutParams();
+        CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) addToDoItemFAB.getLayoutParams();
         int fabMargin = lp.bottomMargin;
-        mAddToDoItemFAB.animate().translationY(mAddToDoItemFAB.getHeight() + fabMargin).setInterpolator(new AccelerateInterpolator(2.0f)).start();
+        addToDoItemFAB.animate()
+            .translationY(addToDoItemFAB.getHeight() + fabMargin)
+            .setInterpolator(new AccelerateInterpolator(2.0f))
+            .start();
       }
     };
-    mRecyclerView.addOnScrollListener(customRecyclerScrollViewListener);
-
+    recyclerView.addOnScrollListener(customRecyclerScrollViewListener);
 
     ItemTouchHelper.Callback callback = new ItemTouchHelperClass(adapter);
-    itemTouchHelper = new ItemTouchHelper(callback);
-    itemTouchHelper.attachToRecyclerView(mRecyclerView);
+    ItemTouchHelper itemTouchHelper = new ItemTouchHelper(callback);
+    itemTouchHelper.attachToRecyclerView(recyclerView);
 
-    mRecyclerView.setAdapter(adapter);
+    recyclerView.setAdapter(adapter);
   }
 
   @Override
@@ -213,14 +170,11 @@ public class MainActivity extends BaseActivity {
   public boolean onOptionsItemSelected(MenuItem item) {
     switch (item.getItemId()) {
       case R.id.aboutMeMenuItem:
-        Intent i = new Intent(this, AboutActivity.class);
-        startActivity(i);
+        startAboutActivity();
         return true;
       case R.id.preferences:
-        Intent intent = new Intent(this, SettingsActivity.class);
-        startActivity(intent);
+        startSettingsActivity();
         return true;
-
       default:
         return super.onOptionsItemSelected(item);
     }
@@ -236,15 +190,12 @@ public class MainActivity extends BaseActivity {
       boolean existed = false;
 
       if (item.hasReminder() && item.getToDoDate() != null) {
-        Intent i = new Intent(this, TodoNotificationService.class);
-        i.putExtra(TodoNotificationService.TODOTEXT, item.getToDoText());
-        i.putExtra(TodoNotificationService.TODOUUID, item.getIdentifier());
-        createAlarm(i, item.getIdentifier().hashCode(), item.getToDoDate().getTime());
+        alarmHandler.createAlarm(item, this);
       }
 
-      for (int i = 0; i < mToDoItemsArrayList.size(); i++) {
-        if (item.getIdentifier().equals(mToDoItemsArrayList.get(i).getIdentifier())) {
-          mToDoItemsArrayList.set(i, item);
+      for (int i = 0; i < toDoItems.size(); i++) {
+        if (item.getIdentifier().equals(toDoItems.get(i).getIdentifier())) {
+          toDoItems.set(i, item);
           existed = true;
           adapter.notifyDataSetChanged();
           break;
@@ -256,190 +207,91 @@ public class MainActivity extends BaseActivity {
     }
   }
 
-  private AlarmManager getAlarmManager() {
-    return (AlarmManager) getSystemService(ALARM_SERVICE);
+  @OnClick(R.id.addToDoItemFAB)
+  public void onAddToDoClicked() {
+    tracker.send(this, "Action", "FAB pressed");
+    startAddToDoActivity(ToDoItem.createEmpty());
   }
 
-  private boolean doesPendingIntentExist(Intent i, int requestCode) {
-    PendingIntent pi = PendingIntent.getService(this, requestCode, i, PendingIntent.FLAG_NO_CREATE);
-    return pi != null;
+  private void startAddToDoActivity(ToDoItem item) {
+    Intent intent = new Intent(MainActivity.this, AddToDoActivity.class);
+    intent.putExtra(TODOITEM, item);
+    startActivityForResult(intent, REQUEST_ID_TODO_ITEM);
   }
 
-  private void createAlarm(Intent i, int requestCode, long timeInMillis) {
-    AlarmManager am = getAlarmManager();
-    PendingIntent pi = PendingIntent.getService(this, requestCode, i, PendingIntent.FLAG_UPDATE_CURRENT);
-    am.set(AlarmManager.RTC_WAKEUP, timeInMillis, pi);
+  private void startAboutActivity() {
+    Intent i = new Intent(this, AboutActivity.class);
+    startActivity(i);
   }
 
-  private void deleteAlarm(Intent i, int requestCode) {
-    if (doesPendingIntentExist(i, requestCode)) {
-      PendingIntent pi = PendingIntent.getService(this, requestCode, i, PendingIntent.FLAG_NO_CREATE);
-      pi.cancel();
-      getAlarmManager().cancel(pi);
-    }
+  private void startSettingsActivity() {
+    Intent intent = new Intent(this, SettingsActivity.class);
+    startActivity(intent);
   }
 
   private void addToDataStore(ToDoItem item) {
-    mToDoItemsArrayList.add(item);
-    adapter.notifyItemInserted(mToDoItemsArrayList.size() - 1);
+    toDoItems.add(item);
+    adapter.notifyItemInserted(toDoItems.size() - 1);
   }
 
-
-  public class BasicListAdapter extends RecyclerView.Adapter<BasicListAdapter.ViewHolder> implements ItemTouchHelperClass.ItemTouchHelperAdapter {
-    private ArrayList<ToDoItem> items;
-
-    @Override
-    public void onItemMoved(int fromPosition, int toPosition) {
-      if (fromPosition < toPosition) {
-        for (int i = fromPosition; i < toPosition; i++) {
-          Collections.swap(items, i, i + 1);
-        }
-      } else {
-        for (int i = fromPosition; i > toPosition; i--) {
-          Collections.swap(items, i, i - 1);
-        }
+  private OnItemRemovedListener onItemRemovedListener() {
+    return new OnItemRemovedListener() {
+      @Override
+      public void onItemRemoved(ToDoItem removedItem, int position) {
+        MainActivity.this.onItemRemoved(removedItem, position);
       }
-      notifyItemMoved(fromPosition, toPosition);
-    }
+    };
+  }
 
-    @Override
-    public void onItemRemoved(final int position) {
-      //Remove this line if not using Google Analytics
-      tracker.send(this, "Action", "Swiped Todo Away");
-
-      mJustDeletedToDoItem = items.remove(position);
-      mIndexOfDeletedToDoItem = position;
-      Intent i = new Intent(MainActivity.this, TodoNotificationService.class);
-      deleteAlarm(i, mJustDeletedToDoItem.getIdentifier().hashCode());
-      notifyItemRemoved(position);
-
-      String toShow = "Todo";
-      Snackbar.make(mCoordLayout, "Deleted " + toShow, Snackbar.LENGTH_SHORT)
-          .setAction("UNDO", new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-              //Comment the line below if not using Google Analytics
-              tracker.send(this, "Action", "UNDO Pressed");
-              items.add(mIndexOfDeletedToDoItem, mJustDeletedToDoItem);
-              if (mJustDeletedToDoItem.getToDoDate() != null && mJustDeletedToDoItem.hasReminder()) {
-                Intent i = new Intent(MainActivity.this, TodoNotificationService.class);
-                i.putExtra(TodoNotificationService.TODOTEXT, mJustDeletedToDoItem.getToDoText());
-                i.putExtra(TodoNotificationService.TODOUUID, mJustDeletedToDoItem.getIdentifier());
-                createAlarm(i, mJustDeletedToDoItem.getIdentifier().hashCode(), mJustDeletedToDoItem.getToDoDate().getTime());
-              }
-              notifyItemInserted(mIndexOfDeletedToDoItem);
-            }
-          }).show();
-    }
-
-    @Override
-    public BasicListAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-      View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_circle_try, parent, false);
-      return new ViewHolder(v);
-    }
-
-    @Override
-    public void onBindViewHolder(final BasicListAdapter.ViewHolder holder, final int position) {
-      ToDoItem item = items.get(position);
-      //Background color for each to-do item. Necessary for night/day mode
-      int bgColor;
-      //color of title text in our to-do item. White for night mode, dark gray for day mode
-      int todoTextColor;
-      if (preferenceAccessor.getThemeSaved().equals(PreferenceAccessor.LIGHTTHEME)) {
-        bgColor = Color.WHITE;
-        todoTextColor = getResources().getColor(R.color.secondary_text);
-      } else {
-        bgColor = Color.DKGRAY;
-        todoTextColor = Color.WHITE;
+  private BasicListAdapter.OnItemClickedListener onItemClickedListener() {
+    return new BasicListAdapter.OnItemClickedListener() {
+      @Override
+      public void onToDoItemClicked(ToDoItem toDoItem) {
+        startAddToDoActivity(toDoItem);
       }
-      holder.linearLayout.setBackgroundColor(bgColor);
+    };
+  }
 
-      if (item.hasReminder() && item.getToDoDate() != null) {
-        holder.mToDoTextview.setMaxLines(1);
-        holder.mTimeTextView.setVisibility(View.VISIBLE);
-      } else {
-        holder.mTimeTextView.setVisibility(View.GONE);
-        holder.mToDoTextview.setMaxLines(2);
-      }
-      holder.mToDoTextview.setText(item.getToDoText());
-      holder.mToDoTextview.setTextColor(todoTextColor);
-      TextDrawable myDrawable = TextDrawable.builder().beginConfig()
-          .textColor(Color.WHITE)
-          .useFont(Typeface.DEFAULT)
-          .toUpperCase()
-          .endConfig()
-          .buildRound(item.getToDoText().substring(0, 1), item.getTodoColor());
+  private void onItemRemoved(final ToDoItem removedItem, final int position) {
+    //Remove this line if not using Google Analytics
+    tracker.send(this, "Action", "Swiped Todo Away");
 
-      holder.mColorImageView.setImageDrawable(myDrawable);
-      if (item.getToDoDate() != null) {
-        String timeToShow;
-        if (android.text.format.DateFormat.is24HourFormat(MainActivity.this)) {
-          timeToShow = AddToDoActivity.formatDate(MainActivity.DATE_TIME_FORMAT_24_HOUR, item.getToDoDate());
-        } else {
-          timeToShow = AddToDoActivity.formatDate(MainActivity.DATE_TIME_FORMAT_12_HOUR, item.getToDoDate());
-        }
-        holder.mTimeTextView.setText(timeToShow);
-      }
+    alarmHandler.deleteAlarm(removedItem, this);
+    adapter.notifyItemRemoved(position);
 
-
-    }
-
-    @Override
-    public int getItemCount() {
-      return items.size();
-    }
-
-    BasicListAdapter(ArrayList<ToDoItem> items) {
-
-      this.items = items;
-    }
-
-
-    @SuppressWarnings("deprecation")
-    public class ViewHolder extends RecyclerView.ViewHolder {
-
-      View mView;
-      LinearLayout linearLayout;
-      TextView mToDoTextview;
-      ImageView mColorImageView;
-      TextView mTimeTextView;
-
-      public ViewHolder(View v) {
-        super(v);
-        mView = v;
-        v.setOnClickListener(new View.OnClickListener() {
+    String toShow = "Todo";
+    Snackbar.make(coordinatorLayout, "Deleted " + toShow, Snackbar.LENGTH_SHORT)
+        .setAction("UNDO", new View.OnClickListener() {
           @Override
           public void onClick(View v) {
-            ToDoItem item = items.get(ViewHolder.this.getAdapterPosition());
-            Intent i = new Intent(MainActivity.this, AddToDoActivity.class);
-            i.putExtra(TODOITEM, item);
-            startActivityForResult(i, REQUEST_ID_TODO_ITEM);
+            onUndoAction(removedItem, position);
+
           }
-        });
-        mToDoTextview = (TextView) v.findViewById(R.id.toDoListItemTextview);
-        mTimeTextView = (TextView) v.findViewById(R.id.todoListItemTimeTextView);
-        mColorImageView = (ImageView) v.findViewById(R.id.toDoListItemColorImageView);
-        linearLayout = (LinearLayout) v.findViewById(R.id.listItemLinearLayout);
-      }
-    }
+        }).show();
   }
+
+  private void onUndoAction(final ToDoItem removedItem, final int position) {
+    //Comment the line below if not using Google Analytics
+    tracker.send(this, "Action", "UNDO Pressed");
+    toDoItems.add(position, removedItem);
+    if (removedItem.getToDoDate() != null && removedItem.hasReminder()) {
+      alarmHandler.createAlarm(removedItem, MainActivity.this);
+    }
+    adapter.notifyItemInserted(position);
+  }
+
 
   @Override
   protected void onPause() {
     super.onPause();
-    try {
-      storeRetrieveData.saveToFile(mToDoItemsArrayList);
-    } catch (JSONException | IOException e) {
-      e.printStackTrace();
-    }
+    dataHandler.saveToDoItems(toDoItems);
   }
 
 
   @Override
   protected void onDestroy() {
     super.onDestroy();
-    mRecyclerView.removeOnScrollListener(customRecyclerScrollViewListener);
+    recyclerView.removeOnScrollListener(customRecyclerScrollViewListener);
   }
 }
 

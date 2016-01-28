@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.List;
 
 public enum StoreRetrieveData {
 
@@ -31,7 +32,7 @@ public enum StoreRetrieveData {
     this.file = new File(context.getFilesDir(), FILENAME);
   }
 
-  public static JSONArray toJSONArray(ArrayList<ToDoItem> items) throws JSONException {
+  public static JSONArray toJSONArray(List<ToDoItem> items) throws JSONException {
     JSONArray jsonArray = new JSONArray();
     for (ToDoItem item : items) {
       JSONObject jsonObject = item.toJSON();
@@ -40,7 +41,7 @@ public enum StoreRetrieveData {
     return jsonArray;
   }
 
-  public void saveToFile(ArrayList<ToDoItem> items) throws JSONException, IOException {
+  public void saveToFile(List<ToDoItem> items) throws JSONException, IOException {
     FileOutputStream fileOutputStream;
     OutputStreamWriter outputStreamWriter;
     fileOutputStream = new FileOutputStream(file);
@@ -50,8 +51,8 @@ public enum StoreRetrieveData {
     fileOutputStream.close();
   }
 
-  public ArrayList<ToDoItem> loadFromFile() throws IOException, JSONException {
-    ArrayList<ToDoItem> items = new ArrayList<>();
+  public List<ToDoItem> loadFromFile() throws IOException, JSONException {
+    List<ToDoItem> items = new ArrayList<>();
     BufferedReader bufferedReader = null;
     FileInputStream fileInputStream = null;
     try {
