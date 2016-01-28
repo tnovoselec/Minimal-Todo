@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.example.avjindersinghsekhon.minimaltodo.R;
+import com.example.avjindersinghsekhon.minimaltodo.business.AnalyticsTracker;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -59,7 +60,7 @@ public class AboutActivity extends BaseActivity {
 
   @OnClick(R.id.aboutContactMe)
   public void onContactMeClicked() {
-    tracker.send(this, "Action", "Feedback");
+    tracker.send(this, AnalyticsTracker.ACTION, "Feedback");
   }
 
   @Override

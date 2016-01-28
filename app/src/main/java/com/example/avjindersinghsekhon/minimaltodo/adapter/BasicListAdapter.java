@@ -14,13 +14,15 @@ import android.widget.TextView;
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.example.avjindersinghsekhon.minimaltodo.ItemTouchHelperClass;
 import com.example.avjindersinghsekhon.minimaltodo.R;
-import com.example.avjindersinghsekhon.minimaltodo.activity.AddToDoActivity;
-import com.example.avjindersinghsekhon.minimaltodo.activity.MainActivity;
 import com.example.avjindersinghsekhon.minimaltodo.business.PreferenceAccessor;
 import com.example.avjindersinghsekhon.minimaltodo.model.ToDoItem;
+import com.example.avjindersinghsekhon.minimaltodo.util.DateUtils;
 
 import java.util.Collections;
 import java.util.List;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
 
 public class BasicListAdapter extends RecyclerView.Adapter<BasicListAdapter.ViewHolder> implements ItemTouchHelperClass.ItemTouchHelperAdapter {
 
@@ -28,15 +30,15 @@ public class BasicListAdapter extends RecyclerView.Adapter<BasicListAdapter.View
     void onToDoItemClicked(ToDoItem toDoItem);
   }
 
-  public interface OnItemRemovedListener{
+  public interface OnItemRemovedListener {
     void onItemRemoved(ToDoItem removedItem, int position);
   }
 
-  private List<ToDoItem> items;
-  private OnItemClickedListener onItemClickedListener;
-  private OnItemRemovedListener onItemRemovedListener;
-  private Context context;
-  private PreferenceAccessor preferenceAccessor = PreferenceAccessor.INSTANCE;
+  private final List<ToDoItem> items;
+  private final OnItemClickedListener onItemClickedListener;
+  private final OnItemRemovedListener onItemRemovedListener;
+  private final Context context;
+  private final PreferenceAccessor preferenceAccessor = PreferenceAccessor.INSTANCE;
 
   public BasicListAdapter(List<ToDoItem> items, OnItemClickedListener onItemClickedListener, OnItemRemovedListener onItemRemovedListener, Context context) {
     this.items = items;
@@ -88,14 +90,14 @@ public class BasicListAdapter extends RecyclerView.Adapter<BasicListAdapter.View
     holder.linearLayout.setBackgroundColor(bgColor);
 
     if (item.hasReminder() && item.getToDoDate() != null) {
-      holder.mToDoTextview.setMaxLines(1);
+      holder.mToDoTextView.setMaxLines(1);
       holder.mTimeTextView.setVisibility(View.VISIBLE);
     } else {
       holder.mTimeTextView.setVisibility(View.GONE);
-      holder.mToDoTextview.setMaxLines(2);
+      holder.mToDoTextView.setMaxLines(2);
     }
-    holder.mToDoTextview.setText(item.getToDoText());
-    holder.mToDoTextview.setTextColor(todoTextColor);
+    holder.mToDoTextView.setText(item.getToDoText());
+    holder.mToDoTextView.setTextColor(todoTextColor);
     TextDrawable myDrawable = TextDrawable.builder().beginConfig()
         .textColor(Color.WHITE)
         .useFont(Typeface.DEFAULT)
@@ -105,16 +107,10 @@ public class BasicListAdapter extends RecyclerView.Adapter<BasicListAdapter.View
 
     holder.mColorImageView.setImageDrawable(myDrawable);
     if (item.getToDoDate() != null) {
-      String timeToShow;
-      if (android.text.format.DateFormat.is24HourFormat(context)) {
-        timeToShow = AddToDoActivity.formatDate(MainActivity.DATE_TIME_FORMAT_24_HOUR, item.getToDoDate());
-      } else {
-        timeToShow = AddToDoActivity.formatDate(MainActivity.DATE_TIME_FORMAT_12_HOUR, item.getToDoDate());
-      }
+
+      String timeToShow = DateUtils.formatDateTime(context, item.getToDoDate());
       holder.mTimeTextView.setText(timeToShow);
     }
-
-
   }
 
   @Override
@@ -125,13 +121,18 @@ public class BasicListAdapter extends RecyclerView.Adapter<BasicListAdapter.View
   @SuppressWarnings("deprecation")
   public class ViewHolder extends RecyclerView.ViewHolder {
 
+    @Bind(R.id.listItemLinearLayout)
     LinearLayout linearLayout;
-    TextView mToDoTextview;
+    @Bind(R.id.toDoListItemTextview)
+    TextView mToDoTextView;
+    @Bind(R.id.toDoListItemColorImageView)
     ImageView mColorImageView;
+    @Bind(R.id.todoListItemTimeTextView)
     TextView mTimeTextView;
 
     public ViewHolder(View v) {
       super(v);
+      ButterKnife.bind(this, v);
       v.setOnClickListener(new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -139,10 +140,6 @@ public class BasicListAdapter extends RecyclerView.Adapter<BasicListAdapter.View
           onItemClickedListener.onToDoItemClicked(item);
         }
       });
-      mToDoTextview = (TextView) v.findViewById(R.id.toDoListItemTextview);
-      mTimeTextView = (TextView) v.findViewById(R.id.todoListItemTimeTextView);
-      mColorImageView = (ImageView) v.findViewById(R.id.toDoListItemColorImageView);
-      linearLayout = (LinearLayout) v.findViewById(R.id.listItemLinearLayout);
     }
   }
 }

@@ -10,6 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.example.avjindersinghsekhon.minimaltodo.R;
+import com.example.avjindersinghsekhon.minimaltodo.business.AnalyticsTracker;
 import com.example.avjindersinghsekhon.minimaltodo.business.DataHandler;
 import com.example.avjindersinghsekhon.minimaltodo.business.PreferenceAccessor;
 import com.example.avjindersinghsekhon.minimaltodo.model.ToDoItem;
@@ -75,7 +76,7 @@ public class ReminderActivity extends BaseActivity {
 
   @OnClick(R.id.toDoReminderRemoveButton)
   public void onRemoveTodo() {
-    tracker.send(this, "Action", "Todo Removed from Reminder Activity");
+    tracker.send(this, AnalyticsTracker.ACTION, "Todo Removed from Reminder Activity");
     mToDoItems.remove(mItem);
     changeOccurred();
     saveData();
@@ -110,7 +111,7 @@ public class ReminderActivity extends BaseActivity {
   }
 
   private Date addTimeToDate(int mins) {
-    tracker.send(this, "Action", "Snoozed", "For " + mins + " minutes");
+    tracker.send(this, AnalyticsTracker.ACTION, "Snoozed", "For " + mins + " minutes");
     Date date = new Date();
     Calendar calendar = Calendar.getInstance();
     calendar.setTime(date);

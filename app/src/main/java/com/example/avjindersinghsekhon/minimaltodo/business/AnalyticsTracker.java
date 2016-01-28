@@ -14,6 +14,8 @@ public enum AnalyticsTracker {
 
   INSTANCE;
 
+  public static final String ACTION = "Action";
+  public static final String SETTINGS = "Settings";
   private static final boolean IS_ENABLED = true;
 
   public Tracker tracker;

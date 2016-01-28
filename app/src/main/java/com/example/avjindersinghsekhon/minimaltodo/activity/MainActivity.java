@@ -21,6 +21,7 @@ import com.example.avjindersinghsekhon.minimaltodo.R;
 import com.example.avjindersinghsekhon.minimaltodo.adapter.BasicListAdapter;
 import com.example.avjindersinghsekhon.minimaltodo.adapter.BasicListAdapter.OnItemRemovedListener;
 import com.example.avjindersinghsekhon.minimaltodo.business.AlarmHandler;
+import com.example.avjindersinghsekhon.minimaltodo.business.AnalyticsTracker;
 import com.example.avjindersinghsekhon.minimaltodo.business.DataHandler;
 import com.example.avjindersinghsekhon.minimaltodo.business.PreferenceAccessor;
 import com.example.avjindersinghsekhon.minimaltodo.model.ToDoItem;
@@ -34,8 +35,6 @@ import butterknife.OnClick;
 
 public class MainActivity extends BaseActivity {
 
-  public static final String DATE_TIME_FORMAT_12_HOUR = "MMM d, yyyy  h:mm a";
-  public static final String DATE_TIME_FORMAT_24_HOUR = "MMM d, yyyy  k:mm";
   public static final String TODOITEM = "com.avjindersinghsekhon.com.avjindersinghsekhon.minimaltodo.MainActivity";
   private static final int REQUEST_ID_TODO_ITEM = 100;
 
@@ -209,7 +208,7 @@ public class MainActivity extends BaseActivity {
 
   @OnClick(R.id.addToDoItemFAB)
   public void onAddToDoClicked() {
-    tracker.send(this, "Action", "FAB pressed");
+    tracker.send(this, AnalyticsTracker.ACTION, "FAB pressed");
     startAddToDoActivity(ToDoItem.createEmpty());
   }
 
@@ -254,7 +253,7 @@ public class MainActivity extends BaseActivity {
 
   private void onItemRemoved(final ToDoItem removedItem, final int position) {
     //Remove this line if not using Google Analytics
-    tracker.send(this, "Action", "Swiped Todo Away");
+    tracker.send(this, AnalyticsTracker.ACTION, "Swiped Todo Away");
 
     alarmHandler.deleteAlarm(removedItem, this);
     adapter.notifyItemRemoved(position);
@@ -272,7 +271,7 @@ public class MainActivity extends BaseActivity {
 
   private void onUndoAction(final ToDoItem removedItem, final int position) {
     //Comment the line below if not using Google Analytics
-    tracker.send(this, "Action", "UNDO Pressed");
+    tracker.send(this, AnalyticsTracker.ACTION, "UNDO Pressed");
     toDoItems.add(position, removedItem);
     if (removedItem.getToDoDate() != null && removedItem.hasReminder()) {
       alarmHandler.createAlarm(removedItem, MainActivity.this);
