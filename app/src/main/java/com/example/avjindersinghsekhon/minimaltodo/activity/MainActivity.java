@@ -40,12 +40,12 @@ public class MainActivity extends BaseActivity {
 
   @Bind(R.id.toDoRecyclerView)
   RecyclerViewEmptySupport recyclerView;
-
   @Bind(R.id.addToDoItemFAB)
   FloatingActionButton addToDoItemFAB;
-
   @Bind(R.id.myCoordinatorLayout)
   CoordinatorLayout coordinatorLayout;
+  @Bind(R.id.toolbar)
+  Toolbar toolbar;
 
   private List<ToDoItem> toDoItems;
   private BasicListAdapter adapter;
@@ -66,11 +66,7 @@ public class MainActivity extends BaseActivity {
     toDoItems = dataHandler.getToDoItems();
 
     setAlarms();
-
-    final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
-
-
     adapter = new BasicListAdapter(toDoItems, onItemClickedListener(), onItemRemovedListener(), this);
 
     setUpRecyclerView();

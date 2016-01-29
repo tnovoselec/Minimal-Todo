@@ -12,7 +12,13 @@ import android.view.MenuItem;
 import com.example.avjindersinghsekhon.minimaltodo.R;
 import com.example.avjindersinghsekhon.minimaltodo.fragment.SettingsFragment;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 public class SettingsActivity extends BaseActivity {
+
+  @Bind(R.id.toolbar)
+  Toolbar toolbar;
 
   @Override
   protected void onResume() {
@@ -24,7 +30,7 @@ public class SettingsActivity extends BaseActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_settings);
-    Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+    ButterKnife.bind(this);
     setSupportActionBar(toolbar);
 
     final Drawable backArrow = getResources().getDrawable(R.drawable.abc_ic_ab_back_mtrl_am_alpha);

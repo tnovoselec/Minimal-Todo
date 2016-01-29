@@ -30,12 +30,12 @@ public class ReminderActivity extends BaseActivity {
 
   @Bind(R.id.toDoReminderTextViewBody)
   TextView mtoDoTextTextView;
-
   @Bind(R.id.todoReminderSnoozeSpinner)
   MaterialSpinner mSnoozeSpinner;
-
   @Bind(R.id.reminderViewSnoozeTextView)
   TextView mSnoozeTextView;
+  @Bind(R.id.toolbar)
+  Toolbar toolbar;
 
   private DataHandler dataHandler = DataHandler.INSTANCE;
   private List<ToDoItem> mToDoItems;
@@ -51,7 +51,7 @@ public class ReminderActivity extends BaseActivity {
     mToDoItems = dataHandler.getToDoItems();
     String[] snoozeOptionsArray = getResources().getStringArray(R.array.snooze_options);
 
-    setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+    setSupportActionBar(toolbar);
 
     Intent i = getIntent();
     UUID id = (UUID) i.getSerializableExtra(TodoNotificationService.TODOUUID);
