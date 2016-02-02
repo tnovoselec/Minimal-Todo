@@ -6,15 +6,20 @@ import com.example.avjindersinghsekhon.minimaltodo.business.AlarmHandler;
 import com.example.avjindersinghsekhon.minimaltodo.business.AnalyticsTracker;
 import com.example.avjindersinghsekhon.minimaltodo.business.PreferenceAccessor;
 import com.example.avjindersinghsekhon.minimaltodo.business.StoreRetrieveData;
+import com.example.avjindersinghsekhon.minimaltodo.shake.ShakeSensor;
 
 public class MinimalToDoApplication extends Application {
 
   @Override
   public void onCreate() {
     super.onCreate();
+
     AnalyticsTracker.INSTANCE.init(this);
     PreferenceAccessor.INSTANCE.init(this);
     StoreRetrieveData.INSTANCE.init(this);
     AlarmHandler.INSTANCE.init(this);
+    ShakeSensor.INSTANCE.init(this);
+
+    registerActivityLifecycleCallbacks(AppStateTracker.INSTANCE);
   }
 }

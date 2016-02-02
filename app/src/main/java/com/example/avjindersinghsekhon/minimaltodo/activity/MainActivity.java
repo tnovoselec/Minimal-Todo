@@ -70,6 +70,7 @@ public class MainActivity extends BaseActivity {
     adapter = new BasicListAdapter(toDoItems, onItemClickedListener(), onItemRemovedListener(), this);
 
     setUpRecyclerView();
+
   }
 
   @Override
@@ -288,6 +289,7 @@ public class MainActivity extends BaseActivity {
     super.onDestroy();
     recyclerView.removeOnScrollListener(customRecyclerScrollViewListener);
   }
+
 }
 
 
