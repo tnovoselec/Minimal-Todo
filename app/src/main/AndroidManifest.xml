@@ -10,14 +10,14 @@
     about 1 second, but it's jarring if users have set Night Mode to true.
     -->
     <application
-        android:name=".AnalyticsApplication"
+        android:name=".MinimalToDoApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/CustomStyle.DarkTheme"
         >
         <activity
-            android:name=".MainActivity"
+            android:name=".activity.MainActivity"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:label="@string/app_name" >
@@ -28,26 +28,26 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".AddToDoActivity"
+        <activity android:name=".activity.AddToDoActivity"
             android:screenOrientation="portrait"
-            android:parentActivityName=".MainActivity"
+            android:parentActivityName=".activity.MainActivity"
             />
 
-        <activity android:name=".AboutActivity"
+        <activity android:name=".activity.AboutActivity"
             android:label="@string/app_name"
-            android:parentActivityName=".MainActivity"
+            android:parentActivityName=".activity.MainActivity"
             />
 
-        <activity android:name=".ReminderActivity"
+        <activity android:name=".activity.ReminderActivity"
             android:label="@string/app_name"
             />
 
-        <service android:name=".TodoNotificationService"
+        <service android:name=".service.TodoNotificationService"
             />
-        <service android:name=".DeleteNotificationService"
+        <service android:name=".service.DeleteNotificationService"
             />
-        <activity android:name=".SettingsActivity"
-            android:parentActivityName=".MainActivity"
+        <activity android:name=".activity.SettingsActivity"
+            android:parentActivityName=".activity.MainActivity"
 
             />
 

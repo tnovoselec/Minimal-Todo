@@ -23,6 +23,8 @@
 
 package com.example.avjindersinghsekhon.minimaltodo;
 
+import com.example.avjindersinghsekhon.minimaltodo.model.ToDoItem;
+
 import junit.framework.TestCase;
 
 import org.json.JSONException;
@@ -47,6 +49,13 @@ public class TestTodoItem extends TestCase {
         assertEquals(TEXT_BODY, toDoItem.getToDoText());
         assertEquals(REMINDER_OFF, toDoItem.hasReminder());
         assertEquals(CURRENT_DATE, toDoItem.getToDoDate());
+    }
+
+    public void testCreateEmptyItem(){
+        ToDoItem emptyToDoItem = ToDoItem.createEmpty();
+        assertEquals("", emptyToDoItem.getToDoText());
+        assertEquals(false, emptyToDoItem.hasReminder());
+        assertEquals(null, emptyToDoItem.getToDoDate());
     }
 
      /**
