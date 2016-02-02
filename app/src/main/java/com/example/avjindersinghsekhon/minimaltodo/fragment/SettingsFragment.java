@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.PreferenceFragment;
+import android.text.TextUtils;
 
 import com.example.avjindersinghsekhon.minimaltodo.PreferenceKeys;
 import com.example.avjindersinghsekhon.minimaltodo.R;
@@ -19,6 +20,9 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     addPreferencesFromResource(R.xml.preferences_layout);
+    PreferenceKeys preferenceKeys = new PreferenceKeys(getResources());
+    CheckBoxPreference checkBoxPreference = (CheckBoxPreference) findPreference(preferenceKeys.night_mode_pref_key);
+    checkBoxPreference.setChecked(TextUtils.equals(preferenceAccessor.getThemeSaved(), PreferenceAccessor.DARKTHEME));
   }
 
   @Override
