@@ -10,6 +10,7 @@ import com.example.avjindersinghsekhon.minimaltodo.PreferenceKeys;
 import com.example.avjindersinghsekhon.minimaltodo.R;
 import com.example.avjindersinghsekhon.minimaltodo.business.AnalyticsTracker;
 import com.example.avjindersinghsekhon.minimaltodo.business.PreferenceAccessor;
+import com.example.avjindersinghsekhon.minimaltodo.util.VisualUtils;
 
 public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -40,7 +41,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         preferenceAccessor.setThemeSaved(PreferenceAccessor.LIGHTTHEME);
       }
 
-      getActivity().recreate();
+      VisualUtils.restartActivity(getActivity(), true);
     }
   }
 
